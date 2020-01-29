@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>数字图像处理复习归纳</title>
+    <url>/2020/01/30/%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E5%A4%8D%E4%B9%A0%E5%BD%92%E7%BA%B3/</url>
+    <content><![CDATA[<p>MIR 核磁共振成像 波段</p>
+<p>相关计算</p>
+<p>实验 FFT流程 (伪代码)</p>
+<p>直方图</p>
+<p>滤波去噪 (噪声与滤波器对应关系)</p>
+<p>二维傅里叶变换 (步骤也有分)</p>
+<h2 id="lecture1-2"><a href="#lecture1-2" class="headerlink" title="lecture1-2"></a>lecture1-2</h2><h4 id="Lecture-1-Introduction"><a href="#Lecture-1-Introduction" class="headerlink" title="Lecture 1 - Introduction"></a>Lecture 1 - Introduction</h4><p>A <strong>digital image</strong> is a representation of a two-dimensional image as a finite set of digital values, called picture elements or pixels.<br>$$<br>f:[a, b] \times[c, d] \rightarrow[0,255]<br>$$<br>Digital image processing focuses on two major tasks</p>
+<ul>
+<li>Improvement of pictorial information for human interpretation.</li>
+<li>Processing of image data for storage, transmission and representation for autonomous machine perception.</li>
+</ul>
+<p>The continuum from image processing to computer vision can be broken up into low-, mid- and high-level processes</p>
+<p><img src="1578058599164.png" alt="1578058599164"></p>
+<p>Two major factors for image creation</p>
+<ul>
+<li>Energy generator</li>
+<li>Energy receiver</li>
+</ul>
+<p>Energy source include</p>
+<ul>
+<li><p>Electromagnetic energy spectrum</p>
+<p><img src="1578057575767.png" alt="1578057575767"></p>
+<ul>
+<li>Gamma-Ray Imaging<ul>
+<li>Used for nuclear medicine and astronomical observations</li>
+</ul>
+</li>
+<li>X-Ray Imaging<ul>
+<li>Used for medical diagnosis and also for industrial inspection</li>
+<li>The object is placed between a X-ray source and a film sensitive to X-ray energy</li>
+<li>The intensity of the X-rays is modified <strong>by absorption as</strong> they pass through the object</li>
+</ul>
+</li>
+<li>Ultraviolet Imaging<ul>
+<li><strong>Used for lithography （</strong>平板印刷）, industrial inspection, microscopy, biological imaging, and astronomical observations</li>
+<li>Ultraviolet light is used in fluorescence microscopy（<strong>荧光显微镜</strong>）</li>
+</ul>
+</li>
+<li>Visible and Infrared Bands Imaging<ul>
+<li>Used in light microscopy, astronomy, remote sensing, industry, and law enforcement</li>
+</ul>
+</li>
+<li>Imaging in the microwave band<ul>
+<li>The dominant application of imaging in the microwave band is radar（雷达）; <strong>radar can get image regardless of weather or ambient lighting conditions</strong>. Radar waves can penetrate clouds, see through vegetation, ice, and dry sand.</li>
+</ul>
+</li>
+<li>Imaging in the radio band<ul>
+<li>Used in medicine and astronomy (consider gamma-rays)</li>
+<li>In medicine, <strong>radio waves</strong> are used in <strong>MRI（核磁共振成像）</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Acoustic</p>
+</li>
+<li><p>Ultrasonic</p>
+</li>
+<li><p>Electronic</p>
+</li>
+</ul>
+<h4 id="Lecture-2-Digital-Image-Fundamentals"><a href="#Lecture-2-Digital-Image-Fundamentals" class="headerlink" title="Lecture 2 - Digital Image Fundamentals"></a>Lecture 2 - Digital Image Fundamentals</h4><p>Structure of the human eye</p>
+<p><img src="1578059145909.png" alt="1578059145909"></p>
+<ul>
+<li><p>Three membranes enclose the eye: the cornea and sclera（角膜和巩膜）, choroid（脉络膜）, and retina（视网膜）</p>
+</li>
+<li><p>When the eye is properly focused, light from an object outside the eye is imaged on the retina</p>
+<ul>
+<li><p>Two kinds of light receptors distribute on the retina, <strong><em>cones</em></strong> and <strong><em>rods</em></strong></p>
+</li>
+<li><p><strong><em>Cones</em></strong> are primarily located in the central portion of the retina, called <strong><em>fovea</em></strong> and are sensitive to color; they function best in relatively bright light; so, cone vision is called <strong><em>bright-light vision</em></strong></p>
+</li>
+<li><p><strong><em>Rods</em></strong> are distributed over the retinal surface; rods serve to give a general overall picture of the field of view; they are not involved in color vision and are sensitive to low levels of illumination; rod vision is called <strong><em>dim-light vision</em></strong></p>
+</li>
+<li><p>Around the region of the emergence of the optic nerve, there is no receptors and results in the so-called <strong><em>blind spot</em></strong></p>
+<p><img src="1578059656614.png" alt="1578059656614"></p>
+</li>
+</ul>
+</li>
+<li><p>Humans usually have three kinds of cones with different photopsins (光视蛋白), which have different spectral response curves; thus, we have <strong><em>trichromatic vision</em></strong>. </p>
+<p><img src="1578059564724.png" alt="1578059564724"></p>
+</li>
+</ul>
+<p>Image formation in the eye</p>
+<ul>
+<li>Muscles within the eye can be used to <strong><em>change the shape of the lens</em></strong> allowing us focus on objects that are near or far away</li>
+</ul>
+<p>Perceived brightness is not a simple function of intensity</p>
+<ul>
+<li><p>Visual system tends to undershoot or overshoot around the boundary of regions of different intensities, called as <strong><em>“Mach” bands</em></strong>（马赫带）</p>
+<p><img src="1578060916306.png" alt="1578060916306"></p>
+</li>
+<li><p>A region’s perceived brightness does not only depend simply on its intensity, but on its surrounding regions; such a phenomenon is called <strong><em>“simultaneous contrast”</em></strong></p>
+<p><img src="1578060936127.png" alt="1578060936127"></p>
+</li>
+</ul>
+<p>Sampling and quantization will convert a continuous image signal <em>f</em> to a discrete digital form</p>
+<ul>
+<li>Digitizing the coordinate values is called <strong><em>sampling</em></strong></li>
+<li>Digitizing the amplitude（振幅） is called <strong><em>quantization</em></strong></li>
+</ul>
+<p>Spatial resolution（空间分辨率）</p>
+<ul>
+<li>The spatial resolution of an image is determined by how sampling was carried out</li>
+<li>DPI (dots per inch) is used to measure the spatial resolution</li>
+</ul>
+<p>Intensity resolution（灰度分辨率）</p>
+<ul>
+<li>Intensity resolution refers to the smallest discernible change in intensity level</li>
+<li>The more intensity levels used, the finer the level of detail discernible in an image</li>
+<li>The number of bits used to quantize intensity is often referred as the <strong><em>intensity resolution</em></strong></li>
+</ul>
+<p>Image interpolation</p>
+<ul>
+<li><p>It is a basic tool used in tasks such as zooming, shrinking, rotating, and geometric corrections</p>
+</li>
+<li><p>Traditional methods include <strong><em>nearest neighbor, bilinear, and bicubic</em></strong></p>
+<ul>
+<li><p><strong><em>nearest neighbor</em></strong>（最近邻内插）</p>
+</li>
+<li><p><strong><em>bilinear</em></strong>（双线性内插）</p>
+</li>
+<li><p><img src="1578150534916.png" alt="1578150534916"></p>
+<p>$v(x,y)=ax+by+cxy+d$, 4 neighbors of p </p>
+</li>
+<li><p><strong><em>bicubic</em></strong>（双三次内插）</p>
+<p>$v(x, y)=\sum_{i=0}^{3} \sum_{j=0}^{3} a_{i j}  x^{i} y^{j}$</p>
+</li>
+</ul>
+<p><img src="" alt="1578125978594"></p>
+</li>
+</ul>
+<h2 id="lecture3"><a href="#lecture3" class="headerlink" title="lecture3"></a>lecture3</h2><blockquote>
+<p>图像增强</p>
+<p>直方图处理</p>
+<p>空间滤波</p>
+<p>平滑滤波</p>
+<p>锐化滤波</p>
+</blockquote>
+<h3 id="Intensity-Transformation"><a href="#Intensity-Transformation" class="headerlink" title="Intensity Transformation"></a>Intensity Transformation</h3><h4 id="image-negatives"><a href="#image-negatives" class="headerlink" title="image negatives"></a>image negatives</h4><ul>
+<li>增强黑色背景中白色或白色的细节</li>
+<li><img src="1578213698883.png" alt="1578213698883"></li>
+<li>S = L-1-r</li>
+</ul>
+<h4 id="thresholding"><a href="#thresholding" class="headerlink" title="thresholding"></a>thresholding</h4><ul>
+<li>二值化，用于分割图像</li>
+</ul>
+<h4 id="log-transformation"><a href="#log-transformation" class="headerlink" title="log transformation"></a>log transformation</h4><ul>
+<li>$s = c*log(1+r)$ c是常数</li>
+<li>压缩高值像素，扩展低值像素</li>
+</ul>
+<h4 id="power-law-transformation（gamma"><a href="#power-law-transformation（gamma" class="headerlink" title="power law transformation（gamma"></a>power law transformation（gamma</h4><ul>
+<li>$s = cr^y​$ c和y为正常数</li>
+<li>y大于1时对高像素进行拉伸</li>
+<li>y小于1时对低像素进行拉伸</li>
+</ul>
+<h4 id="对比度拉伸函数"><a href="#对比度拉伸函数" class="headerlink" title="对比度拉伸函数"></a>对比度拉伸函数</h4><ul>
+<li>$s = 1/(1+(m/r)^E)$</li>
+<li><img src="1577691229936.png" alt="1577691229936"></li>
+</ul>
+<h4 id="Piece-wise-Linear-Transformation"><a href="#Piece-wise-Linear-Transformation" class="headerlink" title="Piece-wise Linear Transformation"></a>Piece-wise Linear Transformation</h4><p>分段线性</p>
+<ul>
+<li>对比度拉伸</li>
+<li><img src="1578214389822.png" alt="1578214389822"></li>
+<li>intensity level slicing</li>
+<li><img src="1578214421483.png" alt="1578214421483"></li>
+<li>bit-plane slicing<ul>
+<li>每个像素值8个比特位，高序比特位的值通常包含了最重要的信息</li>
+<li><img src="1578214440595.png" alt="1578214440595"></li>
+</ul>
+</li>
+</ul>
+<h3 id="Histogram-processing"><a href="#Histogram-processing" class="headerlink" title="Histogram processing"></a>Histogram processing</h3><ul>
+<li><p>PDF概率密度函数 和CDF累积分布函数</p>
+</li>
+<li><p>期望</p>
+<ul>
+<li>$E(X) = $</li>
+</ul>
+</li>
+<li><p>方差</p>
+</li>
+<li><p>高斯分布的密度函数积分为1</p>
+<ul>
+<li>方差：<a href="https://blog.csdn.net/su_jz/article/details/52579723" target="_blank" rel="noopener">https://blog.csdn.net/su_jz/article/details/52579723</a></li>
+</ul>
+</li>
+<li><p>协方差：<img src="1578214815608.png" alt="1578214815608"></p>
+</li>
+</ul>
+<h5 id="histogram-equalization"><a href="#histogram-equalization" class="headerlink" title="histogram equalization"></a>histogram equalization</h5><ul>
+<li>对比度增强</li>
+<li>histogram 是对于PDF的近似</li>
+<li>让每个像素值的概率为$1/(L-1)$</li>
+<li><img src="1578215213723.png" alt="1578215213723"></li>
+<li>离散情况和连续情况？</li>
+<li><img src="1578216154638.png" alt="1578216154638"></li>
+</ul>
+<h3 id="Spatial-Filter"><a href="#Spatial-Filter" class="headerlink" title="Spatial Filter"></a>Spatial Filter</h3><h4 id="相关correlation"><a href="#相关correlation" class="headerlink" title="相关correlation"></a>相关correlation</h4><p>卷积和相关是具有对称性的，卷积要先对称一下</p>
+<p>数学上证明卷积比相关有更好的性质</p>
+<h4 id="convolution"><a href="#convolution" class="headerlink" title="convolution"></a>convolution</h4><p><img src="1578216367362.png" alt="1578216367362"></p>
+<p>性质：</p>
+<ul>
+<li>第三个怎么证明？？</li>
+</ul>
+<h3 id="Smoothing-Spatial-filters"><a href="#Smoothing-Spatial-filters" class="headerlink" title="Smoothing Spatial filters"></a>Smoothing Spatial filters</h3><p><img src="1578217197765.png" alt="1578217197765"></p>
+<p>低通滤波</p>
+<h4 id="高斯滤波"><a href="#高斯滤波" class="headerlink" title="高斯滤波"></a>高斯滤波</h4><ul>
+<li><img src="1578217051223.png" alt="1578217051223"></li>
+<li>长得像高斯函数一样的卷积核，和周围像素的平均，移除了高频部分</li>
+</ul>
+<h4 id="中值滤波"><a href="#中值滤波" class="headerlink" title="中值滤波"></a>中值滤波</h4><ul>
+<li>椒盐噪声</li>
+<li>适用于在一定范围内有少量偏大或偏小的值</li>
+</ul>
+<h3 id="Sharpening-Spatial-Filters"><a href="#Sharpening-Spatial-Filters" class="headerlink" title="Sharpening Spatial Filters"></a>Sharpening Spatial Filters</h3><ul>
+<li>增强边缘，移除模糊</li>
+</ul>
+<h4 id="拉普拉斯算子"><a href="#拉普拉斯算子" class="headerlink" title="拉普拉斯算子"></a>拉普拉斯算子</h4><ul>
+<li>就是计算图像一个点的二阶导数，若有值则是边缘</li>
+<li>旋转不变性的证明？？</li>
+</ul>
+<h2 id="lecture4"><a href="#lecture4" class="headerlink" title="lecture4"></a>lecture4</h2><p>对周期性的函数f(t)如何提取出其中的特定频率下的函数</p>
+<h3 id="傅里叶series-到傅里叶变换"><a href="#傅里叶series-到傅里叶变换" class="headerlink" title="傅里叶series 到傅里叶变换"></a>傅里叶series 到傅里叶变换</h3><ul>
+<li><p>所有的周期函数都可表示为：<img src="1577863404820.png" alt="1577863404820"></p>
+<p><img src="1577871180238.png" alt="1577871180238"></p>
+</li>
+<li><p>及其证明</p>
+</li>
+<li><p>非周期的函数（也可用于周期函数）：<img src="1577871222121.png" alt="1577871222121"></p>
+</li>
+<li><p>用复数形式将周期性的series进行推导得到<img src="1577874294334.png" alt="1577874294334"></p>
+</li>
+<li><p>当T趋于无穷的时候，可推导为非周期函数<img src="1577874368371.png" alt="1577874368371"></p>
+<ul>
+<li>其中s为角频率</li>
+</ul>
+</li>
+<li><p>傅里叶变换的自变量s，代表啥？，在不同频率下的什么值？</p>
+</li>
+</ul>
+<h4 id="傅里叶变换的性质"><a href="#傅里叶变换的性质" class="headerlink" title="傅里叶变换的性质"></a>傅里叶变换的性质</h4><ul>
+<li><img src="1577875735852.png" alt="1577875735852"></li>
+<li>冲激函数<ul>
+<li>当方差0的正态分布函数</li>
+<li>冲击函数的傅里叶变换为1</li>
+<li><img src="1577878768910.png" alt="1577878768910"></li>
+<li>1的傅里叶变换为:<img src="1577876485052.png" alt="1577876485052"></li>
+<li><img src="1577876497201.png" alt="1577876497201"></li>
+<li>冲击串的傅里叶变换还是冲击串</li>
+</ul>
+</li>
+</ul>
+<h5 id="一些函数的傅里叶变换"><a href="#一些函数的傅里叶变换" class="headerlink" title="一些函数的傅里叶变换"></a>一些函数的傅里叶变换</h5><ul>
+<li><p><img src="1577877509667.png" alt="1577877509667"></p>
+</li>
+<li><p><img src="1577877523369.png" alt="1577877523369"></p>
+</li>
+<li><p><img src="1577877600030.png" alt="1577877600030"></p>
+</li>
+</ul>
+<h3 id="傅里叶变换的应用"><a href="#傅里叶变换的应用" class="headerlink" title="傅里叶变换的应用"></a>傅里叶变换的应用</h3><h5 id="卷积定理"><a href="#卷积定理" class="headerlink" title="卷积定理"></a>卷积定理</h5><ul>
+<li><img src="1577879001878.png" alt="1577879001878"></li>
+<li>证明</li>
+</ul>
+<h5 id="高斯滤波-1"><a href="#高斯滤波-1" class="headerlink" title="高斯滤波"></a>高斯滤波</h5><ul>
+<li><p>空域：<img src="1577893834395.png" alt="1577893834395"></p>
+</li>
+<li><p>频域下;<img src="1577893880899.png" alt="1577893880899"></p>
+</li>
+<li><p>$G(u,v) = e^{-2π^2σ^2(u^2+v^2)}$</p>
+</li>
+</ul>
+<h3 id="离散傅里叶变换DFT"><a href="#离散傅里叶变换DFT" class="headerlink" title="离散傅里叶变换DFT"></a>离散傅里叶变换DFT</h3><p>形式：</p>
+<ul>
+<li><p><img src="1577894205293.png" alt="1577894205293"></p>
+</li>
+<li><p><img src="1577894196884.png" alt="1577894196884"></p>
+</li>
+<li><p>FFT 快速傅里叶变换</p>
+</li>
+</ul>
+<p>二维形式：</p>
+<ul>
+<li><p>连续的<img src="1577894521910.png" alt="1577894521910"></p>
+<ul>
+<li>u,v 分别为x,y 方向上的频率</li>
+</ul>
+</li>
+<li><p>离散的</p>
+<ul>
+<li><p><img src="1577896524937.png" alt="1577896524937"></p>
+</li>
+<li><p>u,v 分别代表<code>u/M</code>代表频率，<code>1/M</code>相当于单位，因为它是离散的</p>
+</li>
+</ul>
+<p><strong>性质</strong></p>
+<ul>
+<li>周期性二维傅里叶变换在其变换和反变换在u和v方向上都是无限周期的</li>
+<li><strong>平移</strong>：乘以一个指数项进行左右移动：<img src="1577935810740.png" alt="1577935810740"><ul>
+<li>当 u0 = M/2时，<img src="1577935876961.png" alt="1577935876961"></li>
+<li><strong>旋转</strong>：</li>
+</ul>
+</li>
+<li><img src="1577936382647.png" alt="1577936382647"></li>
+<li>证明？</li>
+</ul>
+</li>
+</ul>
+<h3 id="频域上的图像平滑锐化基本滤波"><a href="#频域上的图像平滑锐化基本滤波" class="headerlink" title="频域上的图像平滑锐化基本滤波"></a>频域上的图像平滑锐化基本滤波</h3><p>谱对图像的平移是不敏感的，它随旋转图像以相同的角度旋转</p>
+<p><img src="1577937953842.png" alt="1577937953842"></p>
+<p>为什么高频部分在四周？</p>
+<ul>
+<li>噪声和边缘都属于高频成分在傅里叶变换中</li>
+</ul>
+<h4 id="Smoothing"><a href="#Smoothing" class="headerlink" title="Smoothing"></a>Smoothing</h4><h5 id="Directly-Filtering-in-the-Frequency-Domain"><a href="#Directly-Filtering-in-the-Frequency-Domain" class="headerlink" title="Directly Filtering in the Frequency Domain"></a>Directly Filtering in the Frequency Domain</h5><p><img src="1578226399690.png" alt="1578226399690"></p>
+<h5 id="Convolution-via-Fourier-Transform"><a href="#Convolution-via-Fourier-Transform" class="headerlink" title="Convolution via Fourier Transform"></a>Convolution via Fourier Transform</h5><p><img src="1578226487072.png" alt="1578226487072"></p>
+<p>1的是白色，通过的部分</p>
+<p>理想低通滤波</p>
+<p><img src="1577938553642.png" alt="1577938553642"></p>
+<ul>
+<li>其中$D(u,v) = {[u^2+v^2]}^{1/2}$半径越小越模糊，<em>D</em>(<em>u,v</em>) is the distance of (<em>u</em>, <em>v</em>) to the frequency centre (0,0) </li>
+</ul>
+<p>Butterworth Low-pass filter</p>
+<p><img src="1577938669284.png" alt="1577938669284"></p>
+<ul>
+<li><img src="1577938753439.png" alt="1577938753439"></li>
+<li>n越大，越趋近于理想的滤波器,也就是越模糊（半径不变时</li>
+</ul>
+<p>Gaussian Low-pass</p>
+<p><img src="1577938845111.png" alt="1577938845111"></p>
+<ul>
+<li><img src="1577938892160.png" alt="1577938892160"></li>
+<li></li>
+</ul>
+<h4 id="Sharpening"><a href="#Sharpening" class="headerlink" title="Sharpening"></a>Sharpening</h4><p>就是高通滤波：即1-低通滤波</p>
+<p><img src="1577939506334.png" alt="1577939506334"></p>
+<p><img src="1578210349026.png" alt="1578210349026"></p>
+<h2 id="lecture-5"><a href="#lecture-5" class="headerlink" title="lecture 5"></a>lecture 5</h2><p>Image Restoration</p>
+<p><img src="1577953453150.png" alt="1577953453150"></p>
+<p><img src="1577953458529.png" alt="1577953458529"></p>
+<h3 id="Nosie-Model"><a href="#Nosie-Model" class="headerlink" title="Nosie Model"></a>Nosie Model</h3><p>表示：</p>
+<ul>
+<li><p><img src="1577953513477.png" alt="1577953513477"></p>
+</li>
+<li><p>类别：高斯噪声，瑞丽噪声，伽马噪声，指数噪声，均匀噪声，脉冲噪声</p>
+<ul>
+<li><img src="1577953650994.png" alt="1577953650994"></li>
+</ul>
+</li>
+</ul>
+<p>周期性噪声：</p>
+<ul>
+<li><img src="1577954056022.png" alt="1577954056022"></li>
+<li><img src="1577954065932.png" alt="1577954065932"></li>
+<li>证明？</li>
+</ul>
+<h3 id="Additive-Random-Noise-Reduction"><a href="#Additive-Random-Noise-Reduction" class="headerlink" title="Additive Random Noise Reduction"></a>Additive Random Noise Reduction</h3><h4 id="算数Arithmetic均值滤波"><a href="#算数Arithmetic均值滤波" class="headerlink" title="算数Arithmetic均值滤波"></a>算数Arithmetic均值滤波</h4><ul>
+<li><p>适合高斯噪声和均匀噪声</p>
+</li>
+<li><p>会导致模糊</p>
+</li>
+<li><p><img src="1577955999631.png" alt="1577955999631"></p>
+</li>
+</ul>
+<h4 id="几何Geometric均值滤波"><a href="#几何Geometric均值滤波" class="headerlink" title="几何Geometric均值滤波"></a>几何Geometric均值滤波</h4><ul>
+<li><img src="1577956015403.png" alt="1577956015403"></li>
+<li>相比于算数均值，保留了一些细节</li>
+</ul>
+<h4 id="谐波Harmonic均值滤波"><a href="#谐波Harmonic均值滤波" class="headerlink" title="谐波Harmonic均值滤波"></a>谐波Harmonic均值滤波</h4><ul>
+<li><img src="1577956180383.png" alt="1577956180383"></li>
+<li>适用于盐粒噪声，擅长处理高斯噪声类型的噪声</li>
+</ul>
+<h4 id="逆谐波均值滤波"><a href="#逆谐波均值滤波" class="headerlink" title="逆谐波均值滤波"></a>逆谐波均值滤波</h4><ul>
+<li><p><img src="1577956315638.png" alt="1577956315638"></p>
+</li>
+<li><p>Q=0 算数</p>
+</li>
+<li><p>Q = -1 谐波，会使暗区加强</p>
+</li>
+<li><p>Q&gt;0 适合胡椒噪声，正谐波会使暗区淡化和模糊</p>
+</li>
+</ul>
+<h4 id="统计排序滤波器"><a href="#统计排序滤波器" class="headerlink" title="统计排序滤波器"></a>统计排序滤波器</h4><ul>
+<li>包括：中值，最大最小值，中点，修正的alpha中值滤波</li>
+</ul>
+<h4 id="Alpha-Trimmed-Mean-Filter"><a href="#Alpha-Trimmed-Mean-Filter" class="headerlink" title="Alpha-Trimmed Mean Filter"></a>Alpha-Trimmed Mean Filter</h4><ul>
+<li><img src="1577956828979.png" alt="1577956828979"></li>
+<li>去掉d/2的最高和最低灰度值，再取中值</li>
+<li>适用情况：包括了多种噪声</li>
+</ul>
+<h4 id="Adaptive-Filter"><a href="#Adaptive-Filter" class="headerlink" title="Adaptive Filter"></a>Adaptive Filter</h4><ul>
+<li>自适应中值滤波<ul>
+<li>作用：移除脉冲噪声，平滑其他噪声，移除失真或断裂的现象</li>
+<li>当脉冲噪声很密集的时候 ，中值滤波效果不佳，因为有可能你取到的中值也是噪声</li>
+<li>其关键就是改变核大小，当渠道的中值还是噪声时，扩大kernel_size,再取中值</li>
+<li>kernel_size 有个最大限制</li>
+<li><img src="1577957335499.png" alt="1577957335499"></li>
+</ul>
+</li>
+</ul>
+<h3 id="Periodic-Noise-Reduction"><a href="#Periodic-Noise-Reduction" class="headerlink" title="Periodic Noise Reduction"></a>Periodic Noise Reduction</h3><h4 id="带阻滤波"><a href="#带阻滤波" class="headerlink" title="带阻滤波"></a>带阻滤波</h4><ul>
+<li>就是可以移除移动频率范围内的</li>
+<li><img src="1577958103336.png" alt="1577958103336"></li>
+</ul>
+<h4 id="限通滤波"><a href="#限通滤波" class="headerlink" title="限通滤波"></a>限通滤波</h4><p><img src="1578243249781.png" alt="1578243249781"></p>
+<ul>
+<li>应用场景？</li>
+</ul>
+<p><strong>步骤</strong></p>
+<ul>
+<li><p><img src="1577960482879.png" alt="1577960482879"></p>
+</li>
+<li><p><img src="1577960507345.png" alt="1577960507345"></p>
+</li>
+<li><p>低频与高频，图像与谱如何对应</p>
+</li>
+</ul>
+<h2 id="lecture-6"><a href="#lecture-6" class="headerlink" title="lecture 6"></a>lecture 6</h2><h3 id="Isolated-point-detection"><a href="#Isolated-point-detection" class="headerlink" title="Isolated point detection"></a>Isolated point detection</h3><ul>
+<li>laplacian 算子<ul>
+<li>对噪声敏感</li>
+<li><img src="1578019468623.png" alt="1578019468623"></li>
+</ul>
+</li>
+</ul>
+<h3 id="Edge-detection"><a href="#Edge-detection" class="headerlink" title="Edge detection"></a>Edge detection</h3><h4 id="边缘类型"><a href="#边缘类型" class="headerlink" title="边缘类型"></a><strong>边缘类型</strong></h4><ul>
+<li>Depth discontinutity:</li>
+<li>Surface orientatation discontinutity: block edge</li>
+<li>reflectance discontinutity: texture or changes</li>
+<li>illuminaiton discontinutity：like shadow</li>
+</ul>
+<p><strong>基本步骤</strong>：</p>
+<ul>
+<li>reduce noise</li>
+<li>detect edge point</li>
+<li>edge localization</li>
+</ul>
+<p>梯度方向与边缘垂直</p>
+<p><strong>SOBEL 算子</strong></p>
+<p><img src="1578229175165.png" alt="1578229175165"></p>
+<p><strong>Prewitt 算子</strong></p>
+<p><img src="1578229183114.png" alt="1578229183114"></p>
+<p><img src="1578021101873.png" alt="1578021101873"></p>
+<h4 id="Marr-Hildreth-Edge-Detector"><a href="#Marr-Hildreth-Edge-Detector" class="headerlink" title="Marr-Hildreth Edge Detector"></a>Marr-Hildreth Edge Detector</h4><ul>
+<li>基本思想：寻找0交叉</li>
+<li>步骤：高斯过滤噪声，拉普拉斯算子计算二阶梯度，找到0交叉点；步骤1和2可以合并为LoG</li>
+</ul>
+<p><img src="1578021485244.png" alt="1578021485244"></p>
+<ul>
+<li><p><strong>高斯拉普拉斯算子LOG</strong>：<img src="1578021498277.png" alt="1578021498277">)可以先被计算出来<img src="1578021710466.png" alt="1578021710466"></p>
+<ul>
+<li><img src="1578021988929.png" alt="1578021988929"></li>
+<li>为什么要用DOG做近似</li>
+<li><img src="1578022184974.png" alt="1578022184974"></li>
+</ul>
+</li>
+<li><p>找到0边缘</p>
+<ul>
+<li><img src="1578022514846.png" alt="1578022514846"></li>
+<li>至少要有两个相对的领域像素的符号不同:左右，上下，两对角</li>
+</ul>
+</li>
+</ul>
+<h4 id="Canny-Edge-Detection"><a href="#Canny-Edge-Detection" class="headerlink" title="Canny Edge Detection"></a>Canny Edge Detection</h4><ul>
+<li><strong>步骤</strong><ul>
+<li>平滑，高斯滤波</li>
+<li>计算gradient magnitude 和 angle map<ul>
+<li><img src="1578023627993.png" alt="1578023627993"></li>
+</ul>
+</li>
+<li>细化由一阶梯度产生的边缘，用非极大值抑制<ul>
+<li>找到与$α(x,y)$最接近的方向（水平 垂直 ±45度等）</li>
+<li>若$M(x,y)$的值大于沿梯度方向的两个邻居的值，则不一致<ul>
+<li>否则，将赋为0，即抑制</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>对抑制过后的进行阈值处理，以减少为边缘点,再进行连接操作<ul>
+<li>强边缘：大于$T^H$</li>
+<li>弱边缘：$[T^L,T^H]​$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>优缺点：表现比前面几种算法都好<ul>
+<li>低错误率，检测到的边缘点都尽可能的是真实的</li>
+<li>谷歌</li>
+</ul>
+</li>
+</ul>
+<h3 id="Segementation-based-on-thresholding"><a href="#Segementation-based-on-thresholding" class="headerlink" title="Segementation based on thresholding"></a>Segementation based on thresholding</h3><p>可化为聚类问题</p>
+<h4 id="Basic-global-thresholding"><a href="#Basic-global-thresholding" class="headerlink" title="Basic global thresholding"></a>Basic global thresholding</h4><p>其实跟k聚类相似</p>
+<p><img src="1578024901333.png" alt="1578024901333"></p>
+<h4 id="Otsu’s-optimum-global-thresholding"><a href="#Otsu’s-optimum-global-thresholding" class="headerlink" title="Otsu’s optimum global thresholding"></a>Otsu’s optimum global thresholding</h4><ul>
+<li>基本思想：寻找合适的像素值阈值k，来使得方差最大化</li>
+<li><img src="1578025421149.png" alt="1578025421149"></li>
+<li><img src="1578230273054.png" alt="1578230273054"></li>
+</ul>
+<h4 id="Variable-thresholding"><a href="#Variable-thresholding" class="headerlink" title="Variable thresholding"></a>Variable thresholding</h4><ul>
+<li><p>为什么要用：有些情况图像中有噪声和非均匀分布的光照（illumination），全局阈值不太好</p>
+</li>
+<li><p>每个像素的阈值都不同，通过<img src="1578025864829.png" alt="1578025864829">来计算（$σ<em>{xy}，m</em>{xy}$,分别为标准差和邻居均值）</p>
+</li>
+</ul>
+<h5 id="moving-average"><a href="#moving-average" class="headerlink" title="moving average"></a>moving average</h5><ul>
+<li>适用于文档处理，当感兴趣的物体与图像的尺寸相比较小（细）时，效果较好，因为针对黑白手写文本，一行中较细的话那个位置的点（周围有污染）均值较小，被污染的位置均值较大，</li>
+<li><img src="1578026188545.png" alt="1578026188545"><h3 id="Analytic-element-detection-by-Hough-transform"><a href="#Analytic-element-detection-by-Hough-transform" class="headerlink" title="Analytic element detection by Hough transform"></a>Analytic element detection by Hough transform</h3></li>
+</ul>
+<p><img src="1578027509161.png" alt="1578027509161"></p>
+<p>修改后的霍夫变换：</p>
+<p><img src="1578027657749.png" alt="1578027657749"></p>
+<p><strong>曲线检测</strong></p>
+<ul>
+<li>用的是更高纬的投票空间</li>
+<li>方法和线检测类似</li>
+</ul>
+<p><strong>优缺点</strong></p>
+<ul>
+<li><p>优点：</p>
+<ul>
+<li>可以处理遮挡</li>
+<li>可以检测出多个实例？</li>
+<li>对噪声有较好的适用性</li>
+</ul>
+</li>
+<li><p>缺点：</p>
+<ul>
+<li>计算时间复杂度：随着曲线的参数增加而指数上升</li>
+<li>投票网格大小不好确定</li>
+<li>非目标形状会在参数空间产生虚假峰</li>
+<li>且在检测过程中只能确定直线方向，丢失了线段的长度信息</li>
+</ul>
+</li>
+</ul>
+<p>如何连接直线？</p>
+<h2 id="lecture-7"><a href="#lecture-7" class="headerlink" title="lecture 7"></a>lecture 7</h2><h3 id="模式和模式类"><a href="#模式和模式类" class="headerlink" title="模式和模式类"></a>模式和模式类</h3><ul>
+<li>三种模式组合：向量，串和树</li>
+</ul>
+<h3 id="RecognitionBased-On-Decision-Theoretic-Methods"><a href="#RecognitionBased-On-Decision-Theoretic-Methods" class="headerlink" title="RecognitionBased On Decision-Theoretic Methods"></a>RecognitionBased On Decision-Theoretic Methods</h3><h4 id="匹配"><a href="#匹配" class="headerlink" title="匹配"></a>匹配</h4><ul>
+<li>最小距离分类器<ul>
+<li>当均值间的距离与每个类的分散度或随机性相比较大时</li>
+<li>个类别的模式向量：<img src="1578107298101.png" alt="1578107298101"></li>
+<li>使用欧氏距离来衡量：<img src="1578107317869.png" alt="1578107317869"></li>
+<li>等价于<img src="1578107330538.png" alt="1578107330538">取最大值</li>
+<li>决策边界是：连接两个模式向量（点）线段的垂直等分线,怎么证明垂直？<ul>
+<li><img src="1578107536508.png" alt="1578107536508"></li>
+<li>$d_{ij}(x)$的符号能够确定该模式的归属</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>如何对应起来的？<img src="1578109800233.png" alt="1578109800233"></li>
+</ul>
+<h4 id="相关"><a href="#相关" class="headerlink" title="相关"></a>相关</h4><ul>
+<li>f为图像 w为模板</li>
+<li><img src="1578244392086.png" alt="1578244392086">是f与w重合区域的平均值，w是模板的平均值</li>
+<li>值域-1,1</li>
+<li><img src="1578233393545.png" alt="1578233393545"></li>
+</ul>
+<h4 id="最佳统计-分类器（贝叶斯分类器）"><a href="#最佳统计-分类器（贝叶斯分类器）" class="headerlink" title="最佳统计 分类器（贝叶斯分类器）"></a>最佳统计 分类器（贝叶斯分类器）</h4><p><img src="1578111159124.png" alt="1578111159124"></p>
+<p>如何证明？</p>
+<ul>
+<li>决策函数其实就是：$d_j(x)= p(x|w_j)*p(w_j)​$</li>
+<li>$p(w_j)$ 为先验概率 $p(x|w_j)$为wj类中模式向量x的概率密度值（由概率密度函数获得），然而这个密度函数不好获得，需要进行估计</li>
+<li>高斯模式类的贝叶斯分类器p567</li>
+<li>贝叶斯分类器的训练，样本用来估计均值向量和协方差矩阵</li>
+<li>$d_j(x) = ln(P(w_j)) + x^TC^{-1}mj - 1/2m^T_jC^{-1}m^j​$</li>
+<li></li>
+</ul>
+]]></content>
+  </entry>
+  <entry>
+    <title>Hello World</title>
+    <url>/2020/01/29/hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<a id="more"></a>
+
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+]]></content>
+      <tags>
+        <tag>Testing</tag>
+        <tag>Another Tag</tag>
+      </tags>
+  </entry>
+</search>
